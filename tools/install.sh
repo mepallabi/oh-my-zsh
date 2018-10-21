@@ -1,4 +1,7 @@
 main() {
+  echo "Enter the name to display"
+  read NAME_TO_DISPLAY
+
   # Use colors, but only if connected to a terminal, and that terminal
   # supports them.
   if which tput >/dev/null 2>&1; then
@@ -23,6 +26,12 @@ main() {
   # Only enable exit-on-error after the non-critical colorization stuff,
   # which may fail on systems lacking tput or terminfo
   set -e
+
+  if ! command -v zsh >/dev/null 2>&1; then
+  CHECK_BREW=$(brew -v | grep "Homebrew " | wc -l)
+    echo "${RED}Install Homebrew first!${NORMAL}"
+    exit
+  fi
 
   if ! command -v zsh >/dev/null 2>&1; then
     printf "${YELLOW}Zsh is not installed!${NORMAL} Please install zsh first!\n"
@@ -59,7 +68,7 @@ main() {
       exit 1
     fi
   fi
-  env git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git "$ZSH" || {
+  env git clone --depth=1 https://github.com/nrjais/oh-my-zsh.git -b master "$ZSH" || {
     printf "Error: git clone of oh-my-zsh repo failed\n"
     exit 1
   }
@@ -75,6 +84,10 @@ main() {
   cp "$ZSH"/templates/zshrc.zsh-template ~/.zshrc
   sed "/^export ZSH=/ c\\
   export ZSH=\"$ZSH\"
+  " ~/.zshrc > ~/.zshrc-omztemp
+
+  sed "/echo NAME_TO_DISPLAY/ c\\
+  echo $NAME_TO_DISPLAY
   " ~/.zshrc > ~/.zshrc-omztemp
   mv -f ~/.zshrc-omztemp ~/.zshrc
 
@@ -92,6 +105,32 @@ main() {
     fi
   fi
 
+  brew install autojump
+  git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
+  git clone git://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+  CHECK_FONT=$(brew cask list | grep "nerd-font" | wc -l)
+  if [ ! $CHECK_FONT -ge 1 ]; then
+    echo "installing Fonts"
+    brew tap caskroom/fonts
+    brew cask install font-hack-nerd-font
+  fi
+  unset CHECK_FONT
+
+  CHECK_AUTOJUMP=$(brew list | grep autojump | wc -l)
+  if [ ! $CHECK_AUTOJUMP -ge 1 ]; then
+    echo "installing autojump"
+    brew install autojump
+  fi
+  unset CHECK_AUTOJUMP
+
+  CHECK_ZSHSH=$(brew list | grep zsh-syntax-highlighting | wc -l)
+  if [ ! $CHECK_ZSHSH -ge 1 ]; then
+    echo "installing zsh-syntax-highlighting"
+    brew install zsh-syntax-highlighting
+  fi
+  unset CHECK_ZSHSH
+
   printf "${GREEN}"
   echo '         __                                     __   '
   echo '  ____  / /_     ____ ___  __  __   ____  _____/ /_  '
@@ -103,11 +142,10 @@ main() {
   echo ''
   echo 'Please look over the ~/.zshrc file to select plugins, themes, and options.'
   echo ''
-  echo 'p.s. Follow us at https://twitter.com/ohmyzsh.'
-  echo ''
-  echo 'p.p.s. Get stickers, shirts, and coffee mugs at https://shop.planetargon.com/collections/oh-my-zsh.'
-  echo ''
   printf "${NORMAL}"
+  echo '***********************************************************'
+  echo 'Change your terminal font to hack-nerd-font in preferences'
+  echo '***********************************************************'
   env zsh -l
 }
 

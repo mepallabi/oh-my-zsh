@@ -9,6 +9,20 @@ if [ -d ~/.oh-my-zsh ]; then
   rm -rf ~/.oh-my-zsh
 fi
 
+CHECK_AUTOJUMP=$(brew list | grep autojump | wc -l)
+if [ $CHECK_AUTOJUMP -ge 1 ]; then
+  echo "uninstalling autojump"
+  brew uninstall autojump
+fi
+unset CHECK_AUTOJUMP
+
+CHECK_ZSHSH=$(brew list | grep zsh-syntax-highlighting | wc -l)
+if [ $CHECK_ZSHSH -ge 1 ]; then
+  echo "uninstalling zsh-syntax-highlighting"
+  brew uninstall zsh-syntax-highlighting
+fi
+unset CHECK_ZSHSH
+
 echo "Looking for original zsh config..."
 if [ -f ~/.zshrc.pre-oh-my-zsh ] || [ -h ~/.zshrc.pre-oh-my-zsh ]; then
   echo "Found ~/.zshrc.pre-oh-my-zsh -- Restoring to ~/.zshrc";
